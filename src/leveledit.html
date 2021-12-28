@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greg's simple level editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="container" @wheel="onWheel">
+
+            <div class="menu">
+                <div class="knob">
+                    <label for="level_width">Level width: <span class="value">{{ level_width }}</span></label>
+                    <input type="range" step="1" v-model="level_width" id="level_width">
+                </div>
+                <div class="knob">
+                    <label for="level_width">Level height: <span class="value">{{ level_height }}</span></label>
+                    <input type="range" step="1" v-model="level_height" id="level_height">
+                </div>
+                <div class="knob">
+                    <label for="mode">Mode: <span class="value">{{ mode }}</span></label>
+                    <select v-model="mode" id="mode">
+                        <option value="paint">Paint</option>
+                        <option value="detail-edit">Detail edit</option>
+                    </select>
+                </div>
+
+                <div class="knob " v-if="mode === 'paint'">
+                    <div class="paint-wall" @click.prevent="setPaintWalls"></div>
+                </div>
+
+                <div class="knob">
+                    <legend>
+                        <strong>Shortcuts:</strong><br><br>
+                        Alt + Wheel: zoom in/out
+                    </legend>
+                </div>
+                <div class="knob">
+                    <input type="submit" step="1" @click.prevent="save" value="Save">
+                </div>
+            </div>
+
+            <div class="editor" v-if="tiles.length" :style="'transform: scale(' + editor_scale + ')'">
+                <div
+                        class="tiles-row"
+                        v-for="(row, y) in tiles"
+                        :style="'grid-template-columns: repeat(' + level_width + ', 1fr)'"
+                >
+                    <div class="tile" v-for="(tile, x) in row" :class="tile.type"><span class="content"></span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            tiles: [],
+            level_width: 0,
+            level_height: 0,
+            editor_scale: 1,
+            mode: 'paint', // paint, detail-edit
+            paint: 'wall', // wall, empty
+        },
+
+        watch: {
+            level_height: function( val ) {
+                this.updateTiles();
+            },
+
+            level_width: function( val ) {
+                this.updateTiles();
+            }
+        },
+
+        mounted() {
+            this.load();
+        },
+
+        methods: {
+
+            onWheel(evt) {
+                if ( evt.altKey === false ) {
+                    return;
+                }
+
+                evt.preventDefault();
+
+                if ( evt.deltaY > 0 && this.editor_scale > 0.1 ) {
+                    this.editor_scale = this.editor_scale - 0.05;
+                } else if ( evt.deltaY < 0 && this.editor_scale < 1 ) {
+                    this.editor_scale = this.editor_scale + 0.05;
+                }
+            },
+
+            createEmptyTile( x, y, type, belongs_to ) {
+                return {
+                    belongs_to: belongs_to,
+                    type: type,
+                    x: x,
+                    y: y,
+                }
+            },
+
+            updateTiles() {
+                this.tiles = [];
+
+                if ( ! this.level_width || ! this.level_height ) {
+                    return;
+                }
+
+                for ( let y = 0; y < this.level_height; y++ ) {
+                    const cols = [];
+
+                    for ( let x = 0; x < this.level_width; x++ ) {
+                        cols.push( this.createEmptyTile(x, y, 'empty', null ) );
+                    }
+
+                    this.tiles.push( cols );
+                }
+            },
+
+            load() {
+                const saved_tiles = window.localStorage.getItem( 'leveledit-tiles' );
+
+                console.log('saved: ');
+                console.log( saved_tiles );
+
+                if ( ! saved_tiles ) {
+                    console.log( 'No saved tiles.' );
+                    return;
+                }
+
+                this.tiles = JSON.parse( saved_tiles );
+
+                if ( this.tiles.length && this.tiles[0].length ) {
+                    this.level_height = this.tiles.length;
+                    this.level_width = this.tiles[0].length;
+                }
+            },
+
+            save() {
+                const saved = JSON.stringify( this.tiles );
+                window.localStorage.setItem( 'leveledit-tiles', saved );
+                console.log( 'Saved the tiles.' );
+            }
+        }
+
+
+    });
+</script>
+
+<style>
+    html {
+        --c1: #DBD0C0;
+        --c2: #FAEEE0;
+        --c3: #F9E4C8;
+        --c4: #F9CF93;
+    }
+
+    html, body {
+        background-color: var(--c2);
+    }
+
+    .container {
+        font-family: mono;
+        display: grid;
+        grid-template-columns: 0.25fr 1.75fr;
+        grid-template-rows: 1fr;
+        gap: 0;
+        grid-template-areas: ". .";
+    }
+
+    .menu {
+        padding: 1rem;
+        background: var(--c1);
+    }
+
+    .editor {
+        padding: 1rem;
+        transition: transform 0.14s linear;
+        transform-origin: top;
+    }
+
+    .knob {
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+    }
+
+    .knob input {
+        width: 100%;
+    }
+
+    .knob label {
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .knob label .value {
+        display: inline;
+        background-color: yellowgreen;
+        padding: 0.25rem;
+    }
+
+    .tiles-row {
+        display: grid;
+        gap: 1px;
+        margin-bottom: 1px;
+    }
+
+    .tile {
+        position: relative;
+        border: 1px solid var(--c2);
+        cursor: pointer;
+        transition: transform 0.13s linear;
+    }
+
+    .tile:hover {
+        transform: scale(1.15);
+        z-index: 99;
+        box-shadow: 0px 0px 5px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .tile:before {
+        content: "";
+        display: inline-block;
+        width: 1px;
+        height: 0;
+        padding-bottom: 100%;
+    }
+
+    .tile .content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        display: grid;
+        align-items: center;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .tile.empty {
+        background: var(--c4);
+    }
+
+</style>
+
+</html>
