@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import PlayerInput from './input/PlayerInput';
 import Display from "./Display";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
+import PlayerEventQueue from "./queues/PlayerEventQueue";
 
 export default class Player {
     public display: Display;
@@ -13,17 +14,31 @@ export default class Player {
     private swing_angle: number;
     public controls: PointerLockControls;
 
+    static EYES_ABOVE_GROUND:number = 2.0;
+    private player_events: PlayerEventQueue;
+
     constructor( display: Display, initial_position: Vector3, pointer_lock_controls: PointerLockControls, input ?: PlayerInput ) {
         this.display = display;
         this.input = input ? input : new PlayerInput();
         this.controls = pointer_lock_controls;
-        this.initial_position = new Vector3( initial_position.x, initial_position.y, initial_position.z );
-        this.position = new Vector3( initial_position.x, initial_position.y, initial_position.z );
+        this.initial_position = new Vector3( initial_position.x, initial_position.y + Player.EYES_ABOVE_GROUND , initial_position.z );
+        this.position = new Vector3( initial_position.x, initial_position.y + Player.EYES_ABOVE_GROUND, initial_position.z );
         this.velocity = new Vector3( 0.0, 0.0, 0.0 ); // x: (-)left / (+)right , y:(-)up / (+) down,  z: (-)backward / (+) forward
         this.swing_step = 0.15;
         this.swing_angle = 0.0;
 
+        this.player_events = PlayerEventQueue.getInstance();
+        
+        this.setInitialLookAt();
         this.attachEventsListerers();
+    }
+
+    /**
+     * Sets the initial "look at" for FPP camera (player)
+     * @private
+     */
+    private setInitialLookAt() {
+        this.display.cam.lookAt( this.initial_position );
     }
 
     /**
@@ -32,6 +47,9 @@ export default class Player {
      * to move the player (camera in fact).
      */
     public handleInput() {
+
+        const last_button = this.input.getLastButton();
+
         if ( this.input.buttons.up.pressed || this.input.buttons.down.pressed ) {
             if ( this.input.buttons.down.time > this.input.buttons.up.time ) {
                 this.velocity.z = -0.25;
@@ -51,6 +69,7 @@ export default class Player {
         } else {
             this.velocity.x = 0;
         }
+
     }
 
     /**

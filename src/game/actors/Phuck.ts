@@ -30,8 +30,19 @@ export default class Phuck extends Actor {
         this.health = health;
         this.hit_damage = hit_damage;
         this.rotation = 0.0;
+
         this.createMesh();
         this.createStates();
+        this.setInitialPosition();
+    }
+
+    protected createStates() {
+        this.states = new Map<string, PhuckState>();
+        this.states.set( 'idle', new PhuckState( this ) );
+        this.states.set( 'live', new PhuckStateLive( this ) );
+        this.states.set( 'falling', new PhuckStateFalling( this ) );
+
+        this.state = this.states.get( 'live' );
     }
 
     public addToScene( scene: THREE.Scene ) {
@@ -49,24 +60,14 @@ export default class Phuck extends Actor {
         const intersect = this.raycaster.intersectObject( this.mesh );
         if ( intersect.length ) {
             this.is_on_target = true;
-            console.log('Intersects: the mesh: ', this.mesh.uuid );
-            // this.state = this.states.get( 'falling' );
         } else {
             this.is_on_target = false;
-            // this.state = this.states.get( 'live' );
         }
-    }
-
-    protected createStates() {
-        this.states = new Map<string, PhuckState>();
-        this.states.set( 'idle', new PhuckState( this ) );
-        this.states.set( 'live', new PhuckStateLive( this ) );
-        this.states.set( 'falling', new PhuckStateFalling( this ) );
-        this.state = this.states.get( 'live' );
     }
 
     protected createMesh() {
         const texture = this.assets.textures.get( 'color_transistor' );
+
         const material = new THREE.MeshBasicMaterial({
             color: new THREE.Color(1.0, 1.0, 0.0 ),
             side: THREE.DoubleSide,
@@ -75,15 +76,16 @@ export default class Phuck extends Actor {
 
         const geometry = new THREE.BoxGeometry( 2, 2, 2, 1, 1, 1 );
         this.mesh = new THREE.Mesh( geometry, material );
-        this.mesh.position.x = this.center.x;
-        this.mesh.position.y = this.center.y;
-        this.mesh.position.z = this.center.z;
+    }
 
-        /**
-         * Set the initial rotation
-         */
-        this.mesh.position.x = this.mesh.position.x + Math.cos( this.initial_angle ) * this.radius;
-        this.mesh.position.z = this.mesh.position.x + Math.sin( this.initial_angle ) * this.radius;
+    /**
+     * Set the initial position and applying initial rotation around the center.
+     */
+    protected setInitialPosition() {
+        const initial_x = this.center.x + Math.cos( this.initial_angle ) * this.radius;
+        const initial_z = this.center.z + Math.sin( this.initial_angle ) * this.radius;
+
+        this.mesh.position.set( initial_x, this.center.y, initial_z );
     }
 
     public update( dt: number, et: number ) {

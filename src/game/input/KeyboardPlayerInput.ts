@@ -13,6 +13,7 @@ export default class KeyboardPlayerInput extends PlayerInput {
         this.keyLeft = keyLeft;
         this.keyRight = keyRight;
         this.keyFire = keyFire;
+
         this.connectInput();
     }
 
@@ -30,22 +31,27 @@ export default class KeyboardPlayerInput extends PlayerInput {
                 case this.keyUp:
                     this.buttons.up.pressed = true;
                     this.buttons.up.time = window.performance.now();
+                    this.addToHistory( event.code );
                     break;
                 case this.keyDown:
                     this.buttons.down.pressed = true;
                     this.buttons.down.time = window.performance.now();
+                    this.addToHistory( event.code );
                     break;
                 case this.keyLeft:
                     this.buttons.left.pressed = true;
                     this.buttons.left.time = window.performance.now();
+                    this.addToHistory( event.code );
                     break;
                 case this.keyRight:
                     this.buttons.right.pressed = true;
                     this.buttons.right.time = window.performance.now();
+                    this.addToHistory( event.code );
                     break;
                 case this.keyFire:
                     this.buttons.fire.pressed = true;
                     this.buttons.fire.time = window.performance.now();
+                    this.addToHistory( event.code );
                     break;
             }
         }, false );
@@ -80,5 +86,4 @@ export default class KeyboardPlayerInput extends PlayerInput {
             }
         });
     }
-
 }

@@ -6,6 +6,7 @@ import Assets from './Assets';
 import KeyboardPlayerInput from "./input/KeyboardPlayerInput";
 import {Vector3} from "three";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
+import PlayerEventQueue from "./queues/PlayerEventQueue";
 
 export default class World {
 
@@ -16,10 +17,12 @@ export default class World {
     private clock: THREE.Clock;
     private player: Player;
     private level: Level;
+    private player_events: PlayerEventQueue;
 
     constructor( canvas: HTMLCanvasElement ) {
         this.clock = new THREE.Clock();
         this.assets = new Assets( this.getTexturesForPreload() );
+        this.player_events = PlayerEventQueue.getInstance();
         this.assets.load().then( () => {
             this.createWorld( canvas );
         })
@@ -38,7 +41,7 @@ export default class World {
 
     createPlayer() {
         const keyboard_player_input = new KeyboardPlayerInput( 'KeyW', 'KeyS', 'KeyA', 'KeyD', 'Space' );
-        const initial_position = new Vector3(0.0, 2.0, -30.0 );
+        const initial_position = new Vector3(0.0, 0.0, -30.0 );
         const pointer_lock_controls = new PointerLockControls( this.display.cam, this.display.canvas );
         this.player = new Player( this.display, initial_position, pointer_lock_controls, keyboard_player_input );
     }
