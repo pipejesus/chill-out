@@ -1,4 +1,9 @@
-# Three.js Starter tayken by Grzegorz
+# Three.js Webpack Starter tayken by Grzegorz
+
+## Work in progress, hope Anna will like it ;)
+
+![plot](./demo.gif)
+
 Courtesy of Bruno Simon of https://threejs-journey.xyz/
 
 ## Setup
