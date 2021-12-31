@@ -2,11 +2,11 @@ import NullPlayerInput from "./NullPlayerInput";
 
 export default class PlayerInput extends NullPlayerInput {
 
-    protected keyUp: string;
-    protected keyDown: string;
-    protected keyLeft: string;
-    protected keyRight: string;
-    protected keyFire: string;
+    public keyUp: string;
+    public keyDown: string;
+    public keyLeft: string;
+    public keyRight: string;
+    public keyFire: string;
 
     protected history: string[];
     protected history_head: number;

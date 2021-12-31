@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import Actor from './Actor';
+import Actor, {ActorNotification} from './Actor';
 import { PhuckState, PhuckStateFalling, PhuckStateLive} from './states/PhuckStates';
 import Assets from "../Assets";
+import EVS from "../EVS";
 
 export default class Phuck extends Actor {
 
@@ -18,6 +19,7 @@ export default class Phuck extends Actor {
     private assets: Assets;
     private raycaster: THREE.Raycaster;
     private cam: THREE.Camera;
+    public player_is_shooting: boolean;
 
     constructor( cam: THREE.Camera, assets: Assets, center: THREE.Vector3, radius: number, initial_angle: number, health: number, hit_damage: number ) {
         super();
@@ -30,10 +32,12 @@ export default class Phuck extends Actor {
         this.health = health;
         this.hit_damage = hit_damage;
         this.rotation = 0.0;
+        this.player_is_shooting = false;
 
         this.createMesh();
         this.createStates();
         this.setInitialPosition();
+
     }
 
     protected createStates() {
@@ -45,6 +49,13 @@ export default class Phuck extends Actor {
         this.state = this.states.get( 'live' );
     }
 
+    public onNotify( actor: Actor, notification: ActorNotification ) {
+        if ( notification.event == EVS.EVENT_PLAYER_FIRE ) {
+            console.log( 'PHUCK OBSERVES SHOOTING!', this.mesh.uuid );
+            this.player_is_shooting = true;
+        }
+    }
+
     public addToScene( scene: THREE.Scene ) {
         scene.add( this.mesh );
     }
@@ -54,14 +65,13 @@ export default class Phuck extends Actor {
     }
 
     public isOnPlayersTarget() {
+        this.player_is_shooting = false;
         let look_at_vector = new THREE.Vector3(0,0, -1 );
         look_at_vector.applyQuaternion( this.cam.quaternion );
         this.raycaster.set( this.cam.position, look_at_vector );
         const intersect = this.raycaster.intersectObject( this.mesh );
         if ( intersect.length ) {
-            this.is_on_target = true;
-        } else {
-            this.is_on_target = false;
+            this.state = this.states.get( 'falling' );
         }
     }
 

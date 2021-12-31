@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
-import Player from "./Player";
 
 export default class Display {
 

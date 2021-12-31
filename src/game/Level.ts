@@ -1,15 +1,16 @@
 import * as THREE from "three";
 import {MathUtils} from "three";
-import Player from "./Player";
+import Player from "./actors/Player";
 import Display from "./Display";
 import Assets from "./Assets";
 import Phuck from "./actors/Phuck";
+import Actor, {ActorNotification} from "./actors/Actor";
 
 export type LevelConfig = {
     enemies: number,
 }
 
-export default class Level {
+export default class Level extends Actor {
 
     private floor: THREE.Mesh;
     private player: Player;
@@ -21,6 +22,7 @@ export default class Level {
     private config: LevelConfig;
 
     constructor( player:Player, display: Display, assets: Assets, config: LevelConfig ) {
+        super();
         this.lights = new Map<string, THREE.Light>();
         this.config = config;
         this.player = player;
@@ -28,7 +30,7 @@ export default class Level {
         this.assets = assets;
         this.phucks = [];
         this.createMaze();
-        this.spawnPhucks()
+        this.spawnPhucks();
     }
 
     /**
@@ -38,6 +40,11 @@ export default class Level {
         this.phucks.forEach( ( phuck) => {
             phuck.update( dt, et );
         });
+    }
+
+    public onNotify( actor: Actor, notification: ActorNotification ) {
+        console.log('actor: ', actor);
+        console.log('sends notification here:', notification);
     }
 
     public spawnPhucks() {
@@ -53,7 +60,9 @@ export default class Level {
      * Spawns a phuck.
      */
     public spawnPhuck( center: THREE.Vector3, radius: number, initial_angle: number ) {
-        this.phucks.push( new Phuck( this.display.cam, this.assets, center, radius, initial_angle,100, 50 ) );
+        const phuck = new Phuck( this.display.cam, this.assets, center, radius, initial_angle, 100, 50 );
+        this.player.addObserver( phuck );
+        this.phucks.push( phuck );
         this.phucks[ this.phucks.length - 1 ].addToScene( this.display.scene );
     }
 

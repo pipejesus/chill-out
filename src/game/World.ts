@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import Display from './Display';
-import Player from './Player';
+import Player from './actors/Player';
 import Level, {LevelConfig} from './Level';
 import Assets from './Assets';
 import KeyboardPlayerInput from "./input/KeyboardPlayerInput";
 import {Vector3} from "three";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
-import PlayerEventQueue from "./queues/PlayerEventQueue";
+import PlayerCommandQueue from "./queues/PlayerCommandQueue";
 
 export default class World {
 
@@ -17,12 +17,12 @@ export default class World {
     private clock: THREE.Clock;
     private player: Player;
     private level: Level;
-    private player_events: PlayerEventQueue;
+    private player_commands: PlayerCommandQueue;
 
     constructor( canvas: HTMLCanvasElement ) {
         this.clock = new THREE.Clock();
         this.assets = new Assets( this.getTexturesForPreload() );
-        this.player_events = PlayerEventQueue.getInstance();
+        this.player_commands = PlayerCommandQueue.getInstance();
         this.assets.load().then( () => {
             this.createWorld( canvas );
         })

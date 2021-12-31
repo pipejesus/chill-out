@@ -1,6 +1,6 @@
-export default class PlayerEventQueue {
+export default class PlayerCommandQueue {
 
-    public static instance:PlayerEventQueue;
+    public static instance:PlayerCommandQueue;
     protected queue: object[];
     protected head: number;
     protected tail: number;
@@ -11,10 +11,10 @@ export default class PlayerEventQueue {
     }
 
     public static getInstance() {
-        if ( PlayerEventQueue.instance === null ) {
-            PlayerEventQueue.instance = new PlayerEventQueue();
+        if ( ! PlayerCommandQueue.instance ) {
+            PlayerCommandQueue.instance = new PlayerCommandQueue();
         }
-        return PlayerEventQueue.instance;
+        return PlayerCommandQueue.instance;
     }
 
     /**
@@ -23,7 +23,7 @@ export default class PlayerEventQueue {
     protected setup(): void {
         this.queue = [];
 
-        for ( let i = 0; i < PlayerEventQueue.SIZE; i++ ) {
+        for (let i = 0; i < PlayerCommandQueue.SIZE; i++ ) {
             this.queue.push({});
         }
 
@@ -35,9 +35,9 @@ export default class PlayerEventQueue {
      * Adds event to the queue
      */
     public add( ev: object ) {
-        if ( ( this.tail + 1 ) % PlayerEventQueue.SIZE != this.head ) {
+        if ( ( this.tail + 1 ) % PlayerCommandQueue.SIZE != this.head ) {
             this.queue[ this.tail ] = ev;
-            this.tail = ( this.tail + 1 ) % PlayerEventQueue.SIZE;
+            this.tail = ( this.tail + 1 ) % PlayerCommandQueue.SIZE;
         }
     }
 
@@ -50,7 +50,7 @@ export default class PlayerEventQueue {
         }
 
         const ev = this.queue[ this.head ];
-        this.head = ( this.head + 1 ) % PlayerEventQueue.SIZE;
+        this.head = ( this.head + 1 ) % PlayerCommandQueue.SIZE;
 
         return ev;
     }
