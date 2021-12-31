@@ -5,6 +5,12 @@
 ## Work in progress, hope Anna will like it ;)
 Latest deploy: https://angry-kowalevski-3651fc.netlify.app/ ( loading takes w while: free & slow Netlify, big textures )
 
+## Controls:
+
+W,S,A,D: move/strafe
+Space: shoot
+Mouse: look around
+
 ![plot](./demo.gif)
 
 Courtesy of Bruno Simon of https://threejs-journey.xyz/
